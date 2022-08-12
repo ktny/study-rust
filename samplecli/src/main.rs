@@ -2,6 +2,7 @@ use anyhow::{bail, ensure, Context, Result};
 use clap::Parser;
 use std::fs::File;
 use std::io::{stdin, BufRead, BufReader};
+use std::path::PathBuf;
 
 /**
  * CLI定義
@@ -18,7 +19,7 @@ struct Opts {
     verbose: bool,
 
     #[clap(name = "FILE")]
-    formula_file: Option<String>,
+    formula_file: Option<PathBuf>,
 }
 
 fn main() -> Result<()> {

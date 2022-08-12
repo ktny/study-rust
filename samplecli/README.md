@@ -2,12 +2,18 @@
 
 逆ポーランド記法での計算を行うCLIツール
 
+## インストール
+
+```sh
+cargo install --path .
+```
+
 ## 使い方
 
 ### 標準入力
 
 ```sh
-cargo run 
+rpncalc 
 > 1 1 +
 2
 ```
@@ -15,7 +21,7 @@ cargo run
 ### ファイル入力
 
 ```sh
-cargo run input.txt
+rpncalc input.txt
 2 # 1 1 +
 21 # 1 2 + 3 4 + *
 invalid syntax at 2 # 1000 * 1000
