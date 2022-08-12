@@ -539,3 +539,31 @@ fn main() {
     dbg!(data);
 }
 ```
+
+## 非同期処理
+
+- あるタスク実行中に非同期タスクを作成してランタイムに実行させる
+- asyncによりFutureを返す非同期関数を作成できる
+- awaitによりasync関数の処理結果を受け取るタイミングを制御できる
+- executor::block_onは渡したFutureが完了になるまでブロックして待つメソッド
+
+```rs
+use futures::executor;
+
+struct User {}
+struct UserId(u32);
+struct Db {}
+impl Db {
+    async fn find_by_user_id(&self, user_id: UserId) -> Option<User> {
+        unimplemented!();
+    }
+}
+
+async fn find_user_by_id(db: Db, user_id:: UserId) ->  Option<User> {
+    db.find_by_user_id(user_id).await
+}
+
+fn main() {
+    executor::block_on(find_user_by_id(Db {}, UserId(1)));
+}
+```

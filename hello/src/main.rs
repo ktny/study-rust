@@ -1,41 +1,18 @@
-use std::sync::mpsc;
-use std::thread;
+use futures::executor;
+
+struct User {}
+struct UserId(u32);
+struct Db {}
+impl Db {
+    async fn find_by_user_id(&self, user_id: UserId) -> Option<User> {
+        unimplemented!();
+    }
+}
+
+async fn find_user_by_id(db: Db, user_id:: UserId) ->  Option<User> {
+    db.find_by_user_id(user_id).await
+}
 
 fn main() {
-    let mut handles = Vec::new();
-    let mut data = vec![1; 10];
-    let mut snd_channels = Vec::new();
-    let mut rcv_channels = Vec::new();
-
-    for _ in 0..10 {
-        // mainから各スレッドへのチャンネル
-        let (snd_tx, snd_rx) = mpsc::channel();
-        // 各スレッドからmainへのチャンネル
-        let (rcv_tx, rcv_rx) = mpsc::channel();
-
-        snd_channels.push(snd_tx);
-        rcv_channels.push(rcv_rx);
-
-        handles.push(thread::spawn(move || {
-            let mut data = snd_rx.recv().unwrap();
-            data += 1;
-            let _ = rcv_tx.send(data);
-        }));
-    }
-
-    // 各スレッドにdataの値を送信
-    for x in 0..10 {
-        let _ = snd_channels[x].send(data[x]);
-    }
-
-    // 各スレッドからの結果をdataに格納
-    for x in 0..10 {
-        data[x] = rcv_channels[x].recv().unwrap();
-    }
-
-    for handle in handles {
-        let _ = handle.join();
-    }
-
-    dbg!(data);
+    executor::block_on(find_user_by_id(Db {}, UserId(1)));
 }
