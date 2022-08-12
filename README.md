@@ -567,3 +567,48 @@ fn main() {
     executor::block_on(find_user_by_id(Db {}, UserId(1)));
 }
 ```
+
+## クレートとモジュール
+
+- クレート: いわゆるライブラリ。Rubyでいうgem
+- モジュール: クレートよりも1段階小さな構成要素。複数のモジュールをまとめたものがクレート
+
+使用するクレートはCargo.tomlに記載する。cargo addコマンドでも追記できる。
+
+```toml
+[dependencies]
+rand = "0.7.3"
+```
+
+## テスト
+
+- 機能のためのコードとテストするコードを同じファイルに書くことができる
+- `cargo test`でテストを実行
+- panic発生時に成功にしたい場合は、should_panicアトリビュートを使用する
+- 無視したい場合は、ignoreアトリビュートを使用する
+
+```rs
+pub fn add(x: i32, y: i32) -> i32 {
+    return x + y;
+}
+
+#[test]
+fn test_add() {
+    assert_eq!(0, add(0, 0));
+    assert_eq!(1, add(0, 1));
+    assert_eq!(1, add(1, 0));
+    assert_eq!(2, add(1, 1));
+}
+```
+
+- 同一ファイルでなくtestsディレクトリに分けて書くこともできる
+
+```rs
+// tests/lib.rs
+use test_code::add;
+
+#[test]
+fn integration_test() {
+    assert_eq!(0, add(0, 0));
+}
+```
