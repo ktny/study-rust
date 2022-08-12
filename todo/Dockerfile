@@ -13,7 +13,7 @@ COPY ./templates ./templates
 RUN rm -f target/release/deps/todo*
 RUN cargo build --release
 
-FROM debian:10.4
+FROM debian:buster-slim
 
 COPY --from=builder /todo/target/release/todo /usr/local/bin/todo
 CMD ["todo"]
