@@ -1,7 +1,12 @@
+// 逆ポーランド記法での計算を行うCLIツール
+
 use clap::Parser;
 use std::fs::File;
 use std::io::{stdin, BufRead, BufReader};
 
+/**
+ * CLI定義
+ */
 #[derive(Parser, Debug)]
 #[clap(
     name = "My RPN program",
@@ -48,6 +53,11 @@ fn run<R: BufRead>(reader: R, verbose: bool) {
     }
 }
 
+/**
+ * 数式計算処理を行う構造体
+ *
+ * bool: 処理詳細を出力するか
+ */
 struct RpnCalculator(bool);
 
 impl RpnCalculator {
