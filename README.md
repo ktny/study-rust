@@ -450,3 +450,92 @@ fn main() {
     println!("{} {} {}", b.r, b.g, b.b);
 }
 ```
+
+## マルチスレッド
+
+### 共有メモリ方式
+
+- thread::spawnは引数のクロージャを新しいスレッドで実行する
+    - クロージャ内に渡された変数の所有権を移行するためmoveキーワードを使用する
+    - handle.join()によりスレッドの終了を待つ
+- スレッド間で所有権を共有するにはArcを使用する
+    - 参照カウンタが行われており0になったらメモリが解放される
+- マルチスレッドで同じデータに対して書き換えを行うことはできないので、Mutexにより排他制御を行う
+    - あるスレッドがlockしている間は他のスレッドはlockが完了せず待ちになる
+    - dataの参照を得ているのは常に1つのスレッドだけであることが保証される
+
+```rs
+use std::sync::{Arc, Mutex};
+use std::thread;
+
+fn main() {
+    let mut handles = Vec::new();
+    let data = Arc::new(Mutex::new(vec![1; 10]));
+
+    for x in 0..10 {
+        let data_ref = data.clone();
+        handles.push(thread::spawn(move || {
+            let mut data = data_ref.lock().unwrap();
+            data[x] += 1;
+        }));
+    }
+
+    for handle in handles {
+        let _ = handle.join();
+    }
+
+    dbg!(data);
+}
+```
+
+### メッセージパッシング
+
+- mpsc::channel()でチャネルの作成を行う
+    - 各チャネルはSender(tx)とReciver(rx)を持つ
+    - Sender.sendによりチャネルへデータを送信することができる
+    - Reciver.recvによりチャネルはデータを受信することができる
+
+```rs
+use std::sync::mpsc;
+use std::thread;
+
+fn main() {
+    let mut handles = Vec::new();
+    let mut data = vec![1; 10];
+    let mut snd_channels = Vec::new();
+    let mut rcv_channels = Vec::new();
+
+    for _ in 0..10 {
+        // mainから各スレッドへのチャネル
+        let (snd_tx, snd_rx) = mpsc::channel();
+        // 各スレッドからmainへのチャネル
+        let (rcv_tx, rcv_rx) = mpsc::channel();
+
+        snd_channels.push(snd_tx);
+        rcv_channels.push(rcv_rx);
+
+        // mainから各スレッドへのチャネルで受け取ったdataの要素を+1してmainスレッドに送信する
+        handles.push(thread::spawn(move || {
+            let mut data = snd_rx.recv().unwrap();
+            data += 1;
+            let _ = rcv_tx.send(data);
+        }));
+    }
+
+    // 各スレッドにdataの値を送信
+    for x in 0..10 {
+        let _ = snd_channels[x].send(data[x]);
+    }
+
+    // 各スレッドからの結果をdataに格納
+    for x in 0..10 {
+        data[x] = rcv_channels[x].recv().unwrap();
+    }
+
+    for handle in handles {
+        let _ = handle.join();
+    }
+
+    dbg!(data);
+}
+```
