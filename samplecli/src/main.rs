@@ -1,5 +1,3 @@
-// 逆ポーランド記法での計算を行うCLIツール
-
 use anyhow::{bail, ensure, Context, Result};
 use clap::Parser;
 use std::fs::File;
