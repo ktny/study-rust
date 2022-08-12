@@ -1,6 +1,6 @@
 use clap::Parser;
 use std::fs::File;
-use std::io::{BufRead, BufReader};
+use std::io::{stdin, BufRead, BufReader};
 
 #[derive(Parser, Debug)]
 #[clap(
@@ -26,11 +26,19 @@ fn main() {
         let reader = BufReader::new(f);
         run(reader, opts.verbose);
     } else {
-        println!("No file is specified!");
+        let stdin = stdin();
+        let reader = stdin.lock(); // ロックするとバッファリングして読み出せるようになり高速
+        run(reader, opts.verbose);
     }
 }
 
-fn run(reader: BufReader<File>, verbose: bool) {
+/**
+ * バッファを1行ずつ読み込んで処理する
+ *
+ * @param reader: トレイトBufReadを実装している任意の型
+ * @param verbose: 処理の詳細を出力するか
+ */
+fn run<R: BufRead>(reader: R, verbose: bool) {
     for line in reader.lines() {
         let line = line.unwrap();
         println!("{}", line);
