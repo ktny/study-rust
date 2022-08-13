@@ -45,6 +45,8 @@ cd my-project
 
 ```
 wasm-pack build
+cd www
+npm run start
 ```
 
 ### 🔬 Test in Headless Browsers with `wasm-pack test`
